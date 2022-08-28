@@ -25,7 +25,7 @@ namespace ACC_Pay.Server.Controllers
 
         [HttpGet]
         public async Task<IEnumerable<Employee>> Get()
-        {
+        { 
             return await _accPayDbContext.Employee.ToListAsync();
         }
 
