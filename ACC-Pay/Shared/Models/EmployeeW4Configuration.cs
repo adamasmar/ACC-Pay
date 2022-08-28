@@ -9,7 +9,7 @@
         public decimal Value4a { get; set; }
         public decimal Value4b { get; set; }
         public decimal Value4c { get; set; }
-        public DateOnly DateSigned { get; set; }
+        public DateTime DateSigned { get; set; }
         public virtual W4Years W4year { get; set; }
     }
 }

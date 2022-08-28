@@ -7,8 +7,8 @@
         public string? MiddleName { get; set; }
         public string? LastName { get; set; }
         public int SocialSecurity { get; set; }
-        public DateOnly DateOfBirth { get; set; }
-        public DateOnly StartDate { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public DateTime StartDate { get; set; }
         public virtual List<EmployeeContactInformation>? ContactInformation { get; set; }
     }
 }

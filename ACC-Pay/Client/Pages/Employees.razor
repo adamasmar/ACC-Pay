@@ -1,0 +1,197 @@
+﻿@page "/employees"
+@using ACC_Pay.Shared.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using ACC_Pay.Shared
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>Employees</PageTitle>
+
+<h1>Employees</h1>
+
+<p>Use this page to manage employee information</p>
+
+@if (employees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <RadzenButton Icon="add_circle_outline" style="margin-bottom: 10px" Text="Add New Employee" Click="@InsertRow" Disabled=@(employees == null) />
+    <RadzenDataGrid 
+        @ref="employeesGrid"
+        AllowFiltering="true" 
+        AllowColumnResize="true" 
+        FilterMode="FilterMode.Advanced" 
+        AllowSorting="true" 
+        PageSize="5" 
+        AllowPaging="true" 
+        PagerHorizontalAlign="HorizontalAlign.Left" 
+        ShowPagingSummary="true"
+        Data="@employees" 
+        TItem="Employee" 
+        ColumnWidth="300px" 
+        LogicalFilterOperator="LogicalFilterOperator.Or"
+        EditMode="DataGridEditMode.Single"
+        RowUpdate="@OnUpdateRow"
+        RowCreate="@OnCreateRow"
+    >
+        <Columns>
+
+            <RadzenDataGridColumn TItem="Employee" Property="Employee.FirstName" Title="First Name" Width="220px">
+                <EditTemplate Context="employee">
+                    <RadzenTextBox @bind-Value="employee.FirstName" Style="width:100%; display: block" Name="FirstName" />
+                    <RadzenRequiredValidator Text="First Name is required" Component="FirstName" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Property="Employee.MiddleName" Title="Middle Name" Width="220px">
+                <EditTemplate Context="employee">
+                    <RadzenTextBox @bind-Value="employee.MiddleName" Style="width:100%; display: block" Name="MiddleName" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Property="Employee.LastName" Title="Last Name" Width="220px">
+                <EditTemplate Context="employee">
+                    <RadzenTextBox @bind-Value="employee.LastName" Style="width:100%; display: block" Name="LastName" />
+                    <RadzenRequiredValidator Text="Last Name is required" Component="LastName" Popup="true" />
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Property="Employee.LastName" Title="Date of Birth" Width="200px">
+                <Template Context="employee">
+                    @String.Format("{0:d}", employee.DateOfBirth)
+                </Template>
+                <EditTemplate Context="employee">
+                    <RadzenDatePicker @bind-Value="employee.DateOfBirth" Style="width:100%" DateFormat="MM/dd/yyyy" De/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Property="Employee.StartDate" Title="Start Date" Width="200px">
+                <Template Context="employee">
+                    @String.Format("{0:d}", employee.StartDate)
+                </Template>
+                <EditTemplate Context="employee">
+                    <RadzenDatePicker @bind-Value="employee.StartDate" Style="width:100%" DateFormat="MM/dd/yyyy"/>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Context="employee" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="120px">
+                <Template Context="employee">
+                    <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@(args => EditRow(employee))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="employee">
+                    <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Primary" Class="m-1" Click="@((args) => SaveRow(employee))">
+                    </RadzenButton>
+                    <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Class="m-1" Click="@((args) => CancelEdit(employee))">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+            <RadzenDataGridColumn TItem="Employee" Context="employee" Filterable="false" Sortable="false" TextAlign="TextAlign.Center" Width="60px">
+                <Template Context="employee">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteRow(employee))" @onclick:stopPropagation="true">
+                    </RadzenButton>
+                </Template>
+                <EditTemplate Context="employee">
+                    <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Small" Class="m-1" Click="@(args => DeleteRow(employee))">
+                    </RadzenButton>
+                </EditTemplate>
+            </RadzenDataGridColumn>
+
+        </Columns>
+    </RadzenDataGrid>
+}
+
+@code {
+
+    private RadzenDataGrid<Employee>? employeesGrid;
+    private IList<Employee>? employees;
+    private Employee employeeToInsert;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        base.OnInitialized();
+
+        try
+        {
+            employees = await Http.GetFromJsonAsync<IList<Employee>>("Employees");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+        }
+    }
+
+    private async Task EditRow(Employee order)
+    {
+        await employeesGrid?.EditRow(order);
+    }
+
+    private void OnUpdateRow(Employee employee)
+    {
+        if (employee == employeeToInsert)
+        {
+            employeeToInsert = null;
+        }
+    }
+
+    private async Task SaveRow(Employee employee)
+    {
+        if (employee == employeeToInsert)
+        {
+            employeeToInsert = null;
+        }
+
+        var value = await Http.PutAsJsonAsync<Employee>("Employees", employee);
+        await employeesGrid.UpdateRow(employee);
+    }
+
+    private void CancelEdit(Employee employee)
+    {
+        if (employee == employeeToInsert)
+        {
+            employeeToInsert = null;
+        }
+
+        employeesGrid.CancelEditRow(employee);
+    }
+
+    private async Task DeleteRow(Employee employee)
+    {
+        if (employee == employeeToInsert)
+        {
+            employeeToInsert = null;
+        }
+
+        if (employees.Contains(employee))
+        {
+
+            var httpResponse = await Http.DeleteAsync($@"Employees/{employee.EmployeeId}");
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                employees.Remove(employee);
+                await employeesGrid.Reload();
+            }
+        }
+        else
+        {
+            employeesGrid.CancelEditRow(employee);
+        }
+    }
+
+    private async Task InsertRow()
+    {
+        employeeToInsert = new Employee();
+        await employeesGrid?.InsertRow(employeeToInsert);
+    }
+
+    private void OnCreateRow(Employee order)
+    {
+        employees?.Add(order);
+    }
+}
