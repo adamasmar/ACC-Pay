@@ -22,7 +22,8 @@ namespace ACC_Pay.Client
             builder.Services.AddMsalAuthentication(options =>
             {
                 builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
-                options.ProviderOptions.DefaultAccessTokenScopes.Add("api://c64e2def-e041-430e-bdf2-bf48945f3154/API.Access");
+                options.ProviderOptions.DefaultAccessTokenScopes.Add("https://asmarcustomcabinets.onmicrosoft.com/a2dd1f92-afa0-402f-9376-1cd14601d4bd/API.Access");
+
             });
 
             await builder.Build().RunAsync();
