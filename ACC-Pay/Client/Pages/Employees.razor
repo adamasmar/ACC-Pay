@@ -1,9 +1,7 @@
 ﻿@page "/employees"
 @using ACC_Pay.Shared.Models
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using ACC_Pay.Shared
-@attribute [Authorize]
 @inject HttpClient Http
 
 <PageTitle>Employees</PageTitle>
@@ -116,14 +114,8 @@ else
     {
         base.OnInitialized();
 
-        try
-        {
-            employees = await Http.GetFromJsonAsync<IList<Employee>>("Employees");
-        }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
-        }
+        employees = await Http.GetFromJsonAsync<IList<Employee>>("Employees");
+
     }
 
     private async Task EditRow(Employee order)

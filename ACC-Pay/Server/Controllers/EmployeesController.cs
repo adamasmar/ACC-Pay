@@ -8,10 +8,8 @@ using Microsoft.Identity.Web.Resource;
 
 namespace ACC_Pay.Server.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("[controller]")]
-    [RequiredScope(RequiredScopesConfigurationKey = "AzureAd:Scopes")]
     public class EmployeesController : ControllerBase
     {
         private readonly ILogger<EmployeesController> _logger;
