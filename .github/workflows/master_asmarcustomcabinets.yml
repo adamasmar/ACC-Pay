@@ -53,5 +53,5 @@ jobs:
         with:
           app-name: 'asmarcustomcabinets'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7B73795D1C494DFBB092802C999B86D3 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9A12DC828C68400E99C1FE57EF4EC072 }}
           package: .
